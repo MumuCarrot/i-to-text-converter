@@ -1,13 +1,18 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpService } from './http.service';
 
 @Component({
     selector: 'app-root',
+    standalone: true,
     imports: [FormsModule],
     templateUrl: './app.component.html',
-    styleUrl: './app.component.scss'
+    styleUrl: './app.component.scss',
+    providers: [HttpService]
 })
 export class AppComponent {
+    constructor(private http: HttpService) {}
+
     isDragging = false;
     onFileSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
@@ -40,6 +45,16 @@ export class AppComponent {
             alert('Only JPEG or PNG images can be uploaded');
             return;
         }
+
+        this.http.postImageToText(file).
+            subscribe({
+                next: (response: any) => {
+                  this.text = response.map((i: any) => i.text).join(' ');
+                },
+                error: (error) => {
+                  this.text = "Error: " + error.message;
+                }
+            });
     }
 
     text = "";

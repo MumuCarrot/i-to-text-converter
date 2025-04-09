@@ -1,0 +1,1 @@
+export const WWW_HOST = "http://localhost:4200";

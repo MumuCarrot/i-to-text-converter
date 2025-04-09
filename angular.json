@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "i-to-text-converter": {
+    "i-to-t": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/i-to-text-converter",
+            "outputPath": "dist/i-to-t",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -36,7 +36,7 @@
             ],
             "scripts": [],
             "server": "src/main.server.ts",
-            "prerender": true,
+            "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
             }
@@ -69,10 +69,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "i-to-text-converter:build:production"
+              "buildTarget": "i-to-t:build:production"
             },
             "development": {
-              "buildTarget": "i-to-text-converter:build:development"
+              "buildTarget": "i-to-t:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -105,6 +105,6 @@
     }
   },
   "cli": {
-    "analytics": "ac46517b-a102-4ec3-bc3b-2140713576dd"
+    "analytics": "44d04f1b-ad55-4682-b8c8-fadf982c642c"
   }
 }

@@ -1,56 +1,84 @@
-import { APP_BASE_HREF } from '@angular/common';
-import { CommonEngine, isMainModule } from '@angular/ssr/node';
+import {
+  AngularNodeAppEngine,
+  createNodeRequestHandler,
+  isMainModule,
+  writeResponseToNodeResponse,
+} from '@angular/ssr/node';
 import express from 'express';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import bootstrap from './main.server';
+import { NINJA_API } from './api_tokens';
+import { Request } from 'express';
+import multer from 'multer';
+import axios from 'axios';
+import FormData from 'form-data';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
-const indexHtml = join(serverDistFolder, 'index.server.html');
 
 const app = express();
-const commonEngine = new CommonEngine();
+const angularApp = new AngularNodeAppEngine();
 
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/**', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
+const upload = multer();
+
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
 
 /**
  * Serve static files from /browser
  */
-app.get(
-  '**',
+app.use(
   express.static(browserDistFolder, {
     maxAge: '1y',
-    index: 'index.html'
+    index: false,
+    redirect: false,
   }),
+);
+
+app.post('/imgtotext', upload.single('image'), 
+  async (req: MulterRequest, res) => {
+    if (!req.file) {
+      res.status(400).send({ error: 'No file uploaded' });
+      return;
+    }
+    
+    console.log('Forming data for Ninja API...');
+
+    const { where, api } = NINJA_API;
+    const form = new FormData();
+    form.append('image', req.file.buffer, {
+      filename: 'asd.png',
+      contentType: 'image/png'
+    });
+
+    console.log('Sending to Ninja API...');
+
+    try {
+      const response = await axios.post(where, form, {
+          headers: {
+              'X-Api-Key': api,
+              ...form.getHeaders(),
+          },
+      });
+      res.send(response.data);
+    } catch (error: any) {
+        console.error('Full error:', error);
+        res.status(500).send({ error: 'Failed to process image' });
+    }
+  }
 );
 
 /**
  * Handle all other requests by rendering the Angular application.
  */
-app.get('**', (req, res, next) => {
-  const { protocol, originalUrl, baseUrl, headers } = req;
-
-  commonEngine
-    .render({
-      bootstrap,
-      documentFilePath: indexHtml,
-      url: `${protocol}://${headers.host}${originalUrl}`,
-      publicPath: browserDistFolder,
-      providers: [{ provide: APP_BASE_HREF, useValue: baseUrl }],
-    })
-    .then((html) => res.send(html))
-    .catch((err) => next(err));
+app.use('/**', (req, res, next) => {
+  angularApp
+    .handle(req)
+    .then((response) =>
+      response ? writeResponseToNodeResponse(response, res) : next(),
+    )
+    .catch(next);
 });
 
 /**
@@ -63,3 +91,8 @@ if (isMainModule(import.meta.url)) {
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
 }
+
+/**
+ * The request handler used by the Angular CLI (dev-server and during build).
+ */
+export const reqHandler = createNodeRequestHandler(app);
