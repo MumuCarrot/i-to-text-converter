@@ -9,6 +9,7 @@ import { Observable } from "rxjs";
 export class HttpService {
     constructor(private http: HttpClient) {}
 
+    // Sends an image file to the server for text extraction
     postImageToText(file: File): Observable<Object> {
         const formData = new FormData();
         formData.append('image', file);

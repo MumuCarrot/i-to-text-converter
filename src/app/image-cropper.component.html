@@ -1,0 +1,12 @@
+<div class="container">
+    <image-cropper
+        [imageChangedEvent]="imgS.imageChangedEvent"
+        [maintainAspectRatio]="false"
+        [format]="imgS.imageFormat"
+        (imageCropped)="imageCropped($event)">
+    </image-cropper>
+    <div class="cropper-btns">
+        <button (click)="cancelCrop()">Cancel</button>
+        <button (click)="sendRequest()">Crop</button>
+    </div>
+</div>

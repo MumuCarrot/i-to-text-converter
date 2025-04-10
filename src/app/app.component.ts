@@ -1,68 +1,114 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpService } from './http.service';
+import { StyleService } from './style.service';
+import { NgIf } from '@angular/common';
+import { ImageEditorComponent } from './image-cropper.component';
+import { ImgCropperService } from './img-cropper.service';
 
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [FormsModule],
+    imports: [FormsModule, NgIf, ImageEditorComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
-    providers: [HttpService]
+    providers: [HttpService, StyleService, ImgCropperService]
 })
 export class AppComponent {
-    constructor(private http: HttpService) {}
+    constructor(public style: StyleService, public imgS: ImgCropperService) {}
 
+    file: File | null = null;
     isDragging = false;
+
+    // Handles file selection from an input element
     onFileSelected(event: Event): void {
+        this.processFile(event);
+    }
+
+    // Processes the selected file and validates its type
+    private processFile(event: Event): void {
         const input = event.target as HTMLInputElement;
         if (input.files?.length) {
-            this.processFile(input.files[0]);
+            let file = input.files[0];
+
+            // Validate file type
+            if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                alert('Only JPEG or PNG images can be uploaded');
+                return;
+            }
+
+            // Set image format based on file type
+            const fileType = file.type;
+            if (fileType === 'image/jpeg') {
+                this.imgS.imageFormat = 'jpeg';
+            } else if (fileType === 'image/png') {
+                this.imgS.imageFormat = 'png';
+            }
+
+            // Update ImgCropperService with file details
+            this.imgS.imageChangedEvent = event;
+            this.imgS.file = file;
+            this.style.dimmer = true;
         }
     }
 
+    // Handles drag-over event to indicate a file is being dragged
     onDragOver(event: DragEvent): void {
         event.preventDefault();
         this.isDragging = true;
     }
-
+    
+    // Handles drag-leave event to reset dragging state
     onDragLeave(event: DragEvent): void {
         event.preventDefault();
         this.isDragging = false;
     }
-
+    
+    // Handles file drop event and processes the dropped file
     onDrop(event: DragEvent): void {
         event.preventDefault();
         this.isDragging = false;
-        if (event.dataTransfer?.files.length) {
-            const file = event.dataTransfer.files[0];
-            this.processFile(file);
+    
+        const file = event.dataTransfer?.files?.[0];
+        if (file) {
+            this.handleDroppedFile(file);
         }
     }
-
-    private processFile(file: File): void {
+    
+    // Processes the dropped file and validates its type
+    private handleDroppedFile(file: File): void {
         if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
             alert('Only JPEG or PNG images can be uploaded');
             return;
         }
-
-        this.http.postImageToText(file).
-            subscribe({
-                next: (response: any) => {
-                  this.text = response.map((i: any) => i.text).join(' ');
-                },
-                error: (error) => {
-                  this.text = "Error: " + error.message;
-                }
-            });
+    
+        // Set image format and simulate file input event
+        this.imgS.imageFormat = file.type === 'image/jpeg' ? 'jpeg' : 'png';
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        const fakeInput = document.createElement('input');
+        fakeInput.type = 'file';
+        fakeInput.files = dataTransfer.files;
+    
+        const fakeEvent = { target: fakeInput } as unknown as Event;
+    
+        this.imgS.imageChangedEvent = fakeEvent;
+        this.imgS.file = file;
+        this.style.dimmer = true;
     }
 
-    text = "";
+    // Copies the encoded text to the clipboard
     copytoClipBoard(): void {
-        navigator.clipboard.writeText(this.text).then(() => {
+        navigator.clipboard.writeText(this.imgS.encodedText).then(() => {
             console.log('Text copied to clipboard');
         }).catch(err => {
             console.error('Failed to copy text: ', err);
         });
+    }
+
+    // Resets the input field when the user clicks on it
+    resetInput(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        input.value = '';
     }
 }

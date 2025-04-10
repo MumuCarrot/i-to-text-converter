@@ -1,3 +1,7 @@
+<div class="dimmer" *ngIf="style.dimmer">
+    <app-image-editor></app-image-editor>
+</div>
+
 <header>
   Welcome to ItoTConverter
 </header>
@@ -5,10 +9,10 @@
   <div class="drop-picture">
       <div 
           class="drag-and-drop"
-          (dragover)="onDragOver($event)"
-          (dragleave)="onDragLeave($event)"
-          (drop)="onDrop($event)"
-          [class.dragging]="isDragging">
+          [class.dragging]="isDragging"
+          (dragover)="onDragOver($event)" 
+          (dragleave)="onDragLeave($event)" 
+          (drop)="onDrop($event)">
           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="200px" width="200px" version="1.1" id="_x32_" viewBox="0 0 512 512" xml:space="preserve">
               <g>
                   <path class="st0" d="M378.413,0H208.297h-13.168l-9.314,9.314L57.02,138.102l-9.314,9.314v13.176v265.514   c0,47.36,38.527,85.895,85.895,85.895h244.812c47.353,0,85.881-38.535,85.881-85.895V85.896C464.294,38.528,425.766,0,378.413,0z    M432.497,426.105c0,29.877-24.214,54.091-54.084,54.091H133.601c-29.87,0-54.084-24.214-54.084-54.091V160.591h83.717   c24.884,0,45.063-20.178,45.063-45.07V31.804h170.116c29.87,0,54.084,24.214,54.084,54.092V426.105z"/>
@@ -21,10 +25,10 @@
       </div>
   </div>
   <div class="menu">
-      <input type="file" class="custom-file-input" accept=".jpeg,.png" (change)="onFileSelected($event)"/>
+      <input type="file" class="custom-file-input" accept=".jpeg,.png" (change)="onFileSelected($event)" (click)="resetInput($event)"/>
       <button class="menu-btn" (click)="copytoClipBoard()">Copy text</button>
   </div>
   <div class="text-container">
-      <textarea type="text" placeholder="Your text will appear here" [(ngModel)]="text"></textarea>
+      <textarea type="text" placeholder="Your text will appear here" [(ngModel)]="imgS.encodedText"></textarea>
   </div>
 </div>

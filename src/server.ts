@@ -21,6 +21,7 @@ const angularApp = new AngularNodeAppEngine();
 
 const upload = multer();
 
+// Interface to extend the Request object with file property
 interface MulterRequest extends Request {
   file?: Express.Multer.File;
 }
@@ -36,6 +37,9 @@ app.use(
   }),
 );
 
+/**
+ * Endpoint to handle image-to-text conversion requests
+ */
 app.post('/imgtotext', upload.single('image'), 
   async (req: MulterRequest, res) => {
     if (!req.file) {
@@ -48,8 +52,8 @@ app.post('/imgtotext', upload.single('image'),
     const { where, api } = NINJA_API;
     const form = new FormData();
     form.append('image', req.file.buffer, {
-      filename: 'asd.png',
-      contentType: 'image/png'
+      filename: req.file.filename,
+      contentType: req.file.mimetype,
     });
 
     console.log('Sending to Ninja API...');

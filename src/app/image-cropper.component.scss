@@ -1,0 +1,51 @@
+:host {
+    position: relative;
+    display: flex;
+    height: 100%;
+
+    .container {
+        width: 100%;
+        margin: auto 0;
+
+        image-cropper {
+            height: 800px;
+        }
+    
+        .cropper-btns {
+            width: 100%;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+
+            button {
+                width: calc(100% - 7.3px);
+                display: inline-block;
+                background: -webkit-linear-gradient(90deg, rgb(26, 26, 26), #000000);
+                border: 1px solid #999;
+                border-radius: 3px;
+                padding: 5px 8px;
+                outline: none;
+                white-space: nowrap;
+                user-select: none;
+                cursor: pointer;
+                font-weight: 700;
+                font-size: 16px;
+                color: white;
+                max-width: 400px;
+                margin: 10px 20px;
+                transition: all 0.1s ease;
+            }
+
+            button:hover {
+                border-color: white;
+                transform: translateY(-3px);
+            }
+
+            button:active {
+                background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+                transform: translateY(0px);
+            }
+        }
+    }
+
+}
