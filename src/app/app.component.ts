@@ -81,6 +81,12 @@ export class AppComponent {
             alert('Only JPEG or PNG images can be uploaded');
             return;
         }
+
+        const maxSizeInBytes = 2 * 1024 * 1024;
+        if (file.size > maxSizeInBytes) {
+            alert('The file is too large. Please upload an image smaller than 2 MB.');
+            return;
+        }
     
         // Set image format and simulate file input event
         this.imgS.imageFormat = file.type === 'image/jpeg' ? 'jpeg' : 'png';
